@@ -10,33 +10,38 @@
 
     <footer class="flex flex-row justify-center mt-4 gap-2">
       <!-- <var-button type="primary" auto-loading @click="handleAutoLoadingClick"> 打开文件 </var-button> -->
+      <var-button type="primary" @click="handleAutoLoadingClick">
+        <var-icon name="image-outline" />
+        &nbsp;&nbsp;图片下载
+      </var-button>
 
       <var-button-group type="success" size="normal">
         <var-button @click.stop="switchSheetById(CURRT_SHEET_ID - 1)">
           <var-icon name="chevron-left" />
         </var-button>
 
-        <var-button auto-loading @click="handleAutoLoadingClick">{{
-          `${CURRT_EXCEL_FILE_NAME} (${CURRT_SHEET_ID + 1}/${SHEET_NAMES.length})`
-        }}</var-button>
+        <var-button @click="handleAutoLoadingClick">
+          <var-icon name="upload" />
+          &nbsp;&nbsp;
+          {{ `${CURRT_EXCEL_FILE_NAME} (${CURRT_SHEET_ID + 1}/${SHEET_NAMES.length})` }}</var-button
+        >
 
         <var-button @click.stop="switchSheetById(CURRT_SHEET_ID + 1)">
           <var-icon name="chevron-right" />
         </var-button>
       </var-button-group>
 
-      <var-button type="primary" auto-loading @click="handleAutoLoadingClick"> 图片下载 </var-button>
-
       <var-button type="primary" @click="Popupshow = true">
+        图片设置 &nbsp;&nbsp;
         <var-icon name="cog" />
       </var-button>
     </footer>
   </div>
-  <!-- <var-popup position="right" v-model:show="Popupshow">
+  <var-popup v-model:show="Popupshow">
     <div class="popup-example-block">
       素胚勾勒出青花笔锋浓转淡, 瓶身描绘的牡丹一如你初妆, 冉冉檀香透过窗心事我了然, 宣纸上走笔至此搁一半。
     </div>
-  </var-popup> -->
+  </var-popup>
 </template>
 
 <script lang="ts">
@@ -51,7 +56,7 @@ import Setting from "./setting.vue";
 export default defineComponent({
   name: "Home",
   setup() {
-    const SHEET_NAMES = ref(["test1", "test2"]);
+    const SHEET_NAMES = ref<string[]>([]);
     const CURRT_SHEET_NAME = ref("sheet名称");
     const CURRT_SHEET_ID = ref(0);
     const CURRT_EXCEL_FILE_NAME = ref("打开文件");
@@ -146,11 +151,11 @@ export default defineComponent({
       return new Promise((resolve) => {
         const fileInput = document.createElement("input");
         fileInput.type = "file";
-        fileInput.accept = ".xlsx"; // 只接受 .xlsx 格式的文件
+        fileInput.accept = ".xlsx;.xls"; // 只接受 .xlsx 格式的文件
         fileInput.onchange = handleFileChange;
 
         fileInput.click();
-        setTimeout(resolve, 2000);
+        // setTimeout(resolve, 1500);
       });
     }
 

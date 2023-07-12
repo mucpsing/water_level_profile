@@ -1,8 +1,8 @@
 /*
  * @Author: cpasion-office-win10 373704015@qq.com
  * @Date: 2023-07-12 15:48:27
- * @LastEditors: cpasion-office-win10 373704015@qq.com
- * @LastEditTime: 2023-07-12 18:18:35
+ * @LastEditors: CPS holy.dandelion@139.com
+ * @LastEditTime: 2023-07-13 01:29:40
  * @FilePath: \duanmianzhexiantu\src\components\EchartsWaterLevel\utils.ts
  * @Description: 一些数据处理的过程和工具函数
  */
@@ -105,8 +105,9 @@ export const createEChartsOption = (data: SheetsData): EChartsOption => {
   // 使用 data 来设置折线图的 x 轴和 y 轴数据
   const y_coords_min = Math.min(...data.y_coords);
   const y_min = parseInt(y_coords_min.toString());
-  const y_max = Math.max(...data.y_coords).toFixed();
-  // const x_min = parseInt(Math.min(...data.x_coords).toString());
+  const y_max = Math.max(...data.y_coords, ...data.water_flow).toFixed();
+
+  const x_min = 0;
   const x_max = Math.max(...data.x_coords).toFixed();
   const xy_coords = data.y_coords.map((each_y, i) => [data.x_coords[i], each_y]);
 
@@ -128,19 +129,40 @@ export const createEChartsOption = (data: SheetsData): EChartsOption => {
   }));
 
   // 绘制：【倒三角】
-  const waterFlowDataList = data.water_flow.map((item) => [waterFlowMinX, item]);
-  const waterFlowPoint: SeriesOption = {
-    // 水位点
-    type: "scatter",
-    symbol: "triangle",
-    symbolRotate: 180,
-    symbolSize: 12,
-    symbolOffset: [0, "-50%"],
-    data: waterFlowDataList,
-  };
+  const waterFlowPointData = data.water_flow.map((water, index) => ({
+    x: waterFlowMinX,
+    y: water,
+    label: data.tags[index],
+  }));
+  waterFlowPointData.sort((a, b) => b.y - a.y);
+  const waterFlowPoint: SeriesOption[] = waterFlowPointData.map((item, index) => {
+    let position = "right";
+    if (index % 2 == 1) {
+      position = "left";
+    }
+    return {
+      type: "scatter",
+      symbol: "triangle",
+      symbolRotate: 180,
+      symbolSize: 12,
+      symbolOffset: [0, "-50%"],
+      data: [
+        {
+          value: [item.x, item.y],
+          label: {
+            show: true,
+            formatter: `${item.y} m`,
+            color: "black",
+            position,
+          },
+        },
+      ],
+      color: "blue",
+    };
+  });
 
   console.log({ waterFlowMinYIndex });
-  console.log({ waterFlowDataList });
+  console.log({ waterFlowPoint });
   console.log({ y_coords_min });
   console.log({ waterFlowMinX });
   console.log({ x_max });
@@ -151,10 +173,10 @@ export const createEChartsOption = (data: SheetsData): EChartsOption => {
       {
         name: "起点距(m)",
         type: "value",
-        min: 0,
-        max: Math.max(...data.x_coords),
+        min: x_min,
+        max: x_max,
         data: data.x_coords,
-        nameLocation: "center",
+        nameLocation: "middle",
         nameGap: 30,
       },
     ],
@@ -176,12 +198,8 @@ export const createEChartsOption = (data: SheetsData): EChartsOption => {
       },
     },
     series: [
-      // 倒三角
-      waterFlowPoint,
-
-      // 水位线
-      ...waterFlowLineList,
-
+      ...waterFlowPoint, // 倒三角
+      ...waterFlowLineList, // 水位线
       {
         // 断面线
         smooth: 0.1,
