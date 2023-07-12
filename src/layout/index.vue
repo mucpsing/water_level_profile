@@ -9,16 +9,11 @@
 -->
 
 <template>
-  <Home />
+  <EchartsWaterLevel />
 </template>
 
 <script setup lang="ts">
-import Home from "../components/Home.vue";
-const ccvb1 = ref("111");
-const tes1 = ref(0);
-const testt = () => {
-  tes1.value = tes1.value + 1;
-};
+import EchartsWaterLevel from "../components/EchartsWaterLevel/index.vue";
 </script>
 
 <style lang="stylus" scoped>
