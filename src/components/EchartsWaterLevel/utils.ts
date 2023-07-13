@@ -1,8 +1,8 @@
 /*
  * @Author: cpasion-office-win10 373704015@qq.com
  * @Date: 2023-07-12 15:48:27
- * @LastEditors: cpasion-office-win10 373704015@qq.com
- * @LastEditTime: 2023-07-13 17:27:14
+ * @LastEditors: CPS holy.dandelion@139.com
+ * @LastEditTime: 2023-07-13 23:07:42
  * @FilePath: \duanmianzhexiantu\src\components\EchartsWaterLevel\utils.ts
  * @Description: 一些数据处理的过程和工具函数
  */
@@ -10,9 +10,9 @@
 import * as XLSX from "xlsx";
 import type { WorkBook } from "xlsx";
 import type { EChartsOption, SeriesOption } from "echarts";
-import type { SettingType } from "./settings";
+import type { SettingType } from "./state";
 
-export interface SheetsData {
+export interface SheetsDataT {
   names: string[];
   x_coords: number[];
   y_coords: number[];
@@ -22,7 +22,7 @@ export interface SheetsData {
   sheet_id: number;
 }
 
-export type ExcelDataList = SheetsData[];
+export type ExcelDataListT = SheetsDataT[];
 
 // 提取指定列的数据
 export interface ExtractDataOpts {
@@ -35,7 +35,7 @@ export interface ExtractDataOpts {
  * @return {*}
  */
 export const readdExcelFileFromWorkBook = (workbook: WorkBook) => {
-  const res: ExcelDataList = workbook.SheetNames.map((sheet_name, sheet_id) => {
+  const res: ExcelDataListT = workbook.SheetNames.map((sheet_name, sheet_id) => {
     const sheet = workbook.Sheets[sheet_name];
     const jsonData = XLSX.utils.sheet_to_json(sheet, { header: 1 });
 
@@ -106,7 +106,7 @@ const extractDatas = (data: any[], columns: string[]) => {
   return extractedData;
 };
 
-export const createEChartsOption = (data: SheetsData, settings: SettingType): EChartsOption => {
+export const createEChartsOption = (data: SheetsDataT, settings: SettingType): EChartsOption => {
   // 根据数据绘制折线图的逻辑...
   // 使用 data 来设置折线图的 x 轴和 y 轴数据
   const y_coords_min = Math.min(...data.y_coords);
@@ -189,7 +189,7 @@ export const createEChartsOption = (data: SheetsData, settings: SettingType): EC
 
     // 图例设置
     legend: {
-      show: true,
+      show: settings.legend,
       right: `${settings.legend_x}%`,
       top: `${settings.legend_y}%`,
       icon: "roundRect",
@@ -225,22 +225,23 @@ export const createEChartsOption = (data: SheetsData, settings: SettingType): EC
     graphic: [
       {
         type: "text",
-        left: "15%",
-        top: "15%",
+        left: `${settings.sideTitleX}%`,
+        top: `${settings.sideTitleY}%`,
         style: {
           text: "左岸",
           fill: "#000",
-          fontSize: 15,
+          fontSize: settings.sideTitleSize,
         },
         z: 3,
       },
       {
         type: "text",
-        right: "15%",
-        top: "15%",
+        right: `${settings.sideTitleX}%`,
+        top: `${settings.sideTitleY}%`,
         style: {
           text: "右岸",
           fill: "#000",
+          fontSize: settings.sideTitleSize,
         },
         z: 3,
       },
@@ -255,6 +256,14 @@ export const createEChartsOption = (data: SheetsData, settings: SettingType): EC
       nameLocation: "middle",
       nameGap: 30,
       splitLine: { show: settings.grid },
+      axisLine: {
+        show: true,
+        lineStyle: {
+          color: "#000",
+          width: settings.axisLineWidth,
+          type: "solid",
+        },
+      },
       z: 3,
     },
 
@@ -270,7 +279,7 @@ export const createEChartsOption = (data: SheetsData, settings: SettingType): EC
         show: true,
         lineStyle: {
           color: "#000",
-          width: 1,
+          width: settings.axisLineWidth,
           type: "solid",
         },
       },

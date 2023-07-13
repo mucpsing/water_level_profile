@@ -16,6 +16,8 @@ declare module '@vue/runtime-core' {
     VarCounter: typeof import('@varlet/ui')['_CounterComponent']
     VarForm: typeof import('@varlet/ui')['_FormComponent']
     VarIcon: typeof import('@varlet/ui')['_IconComponent']
+    VarImage: typeof import('@varlet/ui')['_ImageComponent']
+    VarImagePreview: typeof import('@varlet/ui')['_ImagePreviewComponent']
     VarInput: typeof import('@varlet/ui')['_InputComponent']
     VarMenu: typeof import('@varlet/ui')['_MenuComponent']
     VarPopup: typeof import('@varlet/ui')['_PopupComponent']
