@@ -1,16 +1,16 @@
-<template>
+<template class="flex-row flex">
   <div>
     <header class="rounded-lg my-2">
       <h2 class="rounded-lg border-2 border-cyan-300 bg-slate-300 text-black p-2">{{ CURRT_SHEET_NAME }}</h2>
     </header>
 
-    <div class="home border-2 rounded-lg border-cyan-200 w-[800px] h-[420px] bg-slate-400 flex flex-row">
+    <div class="home border-2 rounded-lg border-cyan-200 w-[852px] h-[480px] bg-slate-400 flex flex-row">
       <div id="chart-container" class="rounded-md w-full h-full bg-white"></div>
     </div>
 
     <footer class="flex flex-row justify-center mt-4 gap-2">
       <!-- <var-button type="primary" auto-loading @click="handleAutoLoadingClick"> 打开文件 </var-button> -->
-      <var-button type="primary" @click="handleAutoLoadingClick">
+      <var-button type="primary" @click="downloadImage('chart-container')">
         <var-icon name="image-outline" />
         &nbsp;&nbsp;图片下载
       </var-button>
@@ -35,33 +35,63 @@
         图片设置 &nbsp;&nbsp;
         <var-icon name="cog" />
       </var-button>
+
+      <var-counter :rules="[(v:any) => v >= 0 || '必须大于10']" v-model="Settings.legend_x" />
+      <var-counter :rules="[(v:any) => v >= 0 || '必须大于10']" v-model="Settings.legend_y" />
     </footer>
   </div>
-  <var-popup v-model:show="Popupshow">
-    <div class="popup-example-block">
-      素胚勾勒出青花笔锋浓转淡, 瓶身描绘的牡丹一如你初妆, 冉冉檀香透过窗心事我了然, 宣纸上走笔至此搁一半。
-    </div>
+  <var-popup
+    :overlay-style="{ backgroundColor: `rgba(255, 255, 255, 0)` }"
+    class="w-[260px] p-5"
+    :overlay="true"
+    position="right"
+    v-model:show="Popupshow"
+  >
+    <var-form ref="form" scroll-to-error="start">
+      <var-space direction="column" :size="[20, 10]">
+        <var-input placeholder="图片名称" :rules="[(v:any) => !!v || '用户名不能为空']" v-model="Settings.title" />
+        <div>
+          <var-checkbox v-model="Settings.grid">网格</var-checkbox>
+          <var-checkbox v-model="Settings.grid">网格</var-checkbox>
+          <var-checkbox v-model="Settings.grid">网格</var-checkbox>
+        </div>
+        <p class="text-gray-500">
+          图例位置x: <var-counter :rules="[(v:any) => v >= 0 || '必须大于10']" v-model="Settings.legend_x" />
+        </p>
+        <p class="text-gray-500">
+          图例位置y: <var-counter :rules="[(v:any) => v >= 0 || '必须大于10']" v-model="Settings.legend_y" />
+        </p>
+
+        <var-button class="w-full" type="warning" @click="drawECharts()">
+          <var-icon name="image-outline" />
+          &nbsp;&nbsp;绘&nbsp;&nbsp;制
+        </var-button>
+      </var-space>
+    </var-form>
   </var-popup>
 </template>
 
 <script lang="ts">
-import { defineComponent, onMounted } from "vue";
+import { defineComponent, onMounted, watch } from "vue";
 import * as echarts from "echarts";
 import * as XLSX from "xlsx";
 
 import type { ExcelDataList } from "./utils";
 import { createEChartsOption, readdExcelFileFromWorkBook } from "./utils";
-import Setting from "./setting.vue";
+import { createSettings } from "./settings";
 
 export default defineComponent({
   name: "Home",
   setup() {
+    const Settings = createSettings();
+    const testData = reactive({ range: 10 });
     const SHEET_NAMES = ref<string[]>([]);
     const CURRT_SHEET_NAME = ref("sheet名称");
     const CURRT_SHEET_ID = ref(0);
     const CURRT_EXCEL_FILE_NAME = ref("打开文件");
     const files = ref();
 
+    let CURRT_OPTIONS: echarts.EChartsOption;
     const Popupshow = ref(false);
 
     const chartElementID = "chart-container";
@@ -71,11 +101,15 @@ export default defineComponent({
 
     onMounted(() => {
       chartElement = document.getElementById(chartElementID);
+
+      watch(Settings, (o, n) => {
+        console.log({ o, n });
+        drawECharts();
+      });
     });
 
-    const test = (e: any, i: any) => {
-      console.log("test");
-      console.log({ e, i });
+    const test = () => {
+      drawECharts();
     };
 
     const switchSheetById = (sheetId: number) => {
@@ -112,15 +146,15 @@ export default defineComponent({
       if (!chartElement) chartElement = document.getElementById(chartElementID);
 
       if (chartElement) {
-        const option = createEChartsOption(EXCEL_DATA_LIST[CURRT_SHEET_ID.value]);
+        const option = createEChartsOption(EXCEL_DATA_LIST[CURRT_SHEET_ID.value], Settings);
 
         const chart = echarts.init(chartElement);
 
+        CURRT_OPTIONS = option;
+
         chart.setOption(option);
 
-        if (opts.resize) {
-          chart.resize();
-        }
+        if (opts.resize) chart.resize();
       }
     };
 
@@ -142,9 +176,39 @@ export default defineComponent({
       }
     };
 
-    // 下载图片
-    const downloadImage = () => {
-      // 将 echarts 绘制的图片转换成 png 并下载
+    // 将 echarts 绘制的图片转换成 png 并下载
+    const downloadImage = (chartElementId: string, filename: string = "") => {
+      const chartContainer = document.getElementById(chartElementId);
+      if (!chartContainer) return console.log("获取chart实例失败: ", chartElementId);
+
+      const chart = echarts.getInstanceByDom(chartContainer);
+
+      if (!chart) return console.log("导出图片出错，getInstanceByDom()失败");
+
+      // 将图表转换为 base64 编码的图像数据
+      const imageDataURL = chart.getDataURL({ type: "png", pixelRatio: 2 });
+
+      // 创建虚拟的下载链接
+      const link = document.createElement("a");
+      link.href = imageDataURL;
+
+      if (!filename)
+        filename = `${CURRT_EXCEL_FILE_NAME.value.replace(".xlsx", "").replace(".xls", "")}_${
+          CURRT_SHEET_NAME.value
+        }.png`;
+
+      if (filename.endsWith(".png")) filename = `${filename}.png`;
+      link.download = filename;
+
+      // 设置下载属性
+      link.style.display = "none";
+      document.body.appendChild(link);
+
+      // 模拟点击链接触发下载
+      link.click();
+
+      // 清理并移除链接
+      document.body.removeChild(link);
     };
 
     function handleAutoLoadingClick() {
@@ -170,6 +234,9 @@ export default defineComponent({
       Popupshow,
       test,
       switchSheetById,
+      Settings,
+      testData,
+      drawECharts,
     };
   },
 });
