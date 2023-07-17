@@ -1,6 +1,6 @@
 import type { RouteRecordRaw, createRouter } from "vue-router";
 
-import { Layout } from "../layout/index.vue";
+import Layout from "../layout/index.vue";
 
 const baseRouter: RouteRecordRaw = {
   path: "/",

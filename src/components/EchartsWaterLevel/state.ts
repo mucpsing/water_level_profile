@@ -10,7 +10,7 @@
 import { reactive } from "vue";
 
 export const showExample = ref(false);
-export const examplePngUrl = "/dataExample.png";
+// export const examplePngUrl = "/dataExample.png";
 
 let SETTINGS: SettingType;
 export interface SettingType {

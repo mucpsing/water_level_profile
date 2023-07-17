@@ -11,7 +11,6 @@ declare module '@vue/runtime-core' {
     RouterView: typeof import('vue-router')['RouterView']
     VarButton: typeof import('@varlet/ui')['_ButtonComponent']
     VarButtonGroup: typeof import('@varlet/ui')['_ButtonGroupComponent']
-    VarCell: typeof import('@varlet/ui')['_CellComponent']
     VarCheckbox: typeof import('@varlet/ui')['_CheckboxComponent']
     VarCounter: typeof import('@varlet/ui')['_CounterComponent']
     VarForm: typeof import('@varlet/ui')['_FormComponent']
@@ -19,11 +18,7 @@ declare module '@vue/runtime-core' {
     VarImage: typeof import('@varlet/ui')['_ImageComponent']
     VarImagePreview: typeof import('@varlet/ui')['_ImagePreviewComponent']
     VarInput: typeof import('@varlet/ui')['_InputComponent']
-    VarMenu: typeof import('@varlet/ui')['_MenuComponent']
     VarPopup: typeof import('@varlet/ui')['_PopupComponent']
-    VarSlider: typeof import('@varlet/ui')['_SliderComponent']
     VarSpace: typeof import('@varlet/ui')['_SpaceComponent']
-    VarSwitch: typeof import('@varlet/ui')['_SwitchComponent']
-    VarUploader: typeof import('@varlet/ui')['_UploaderComponent']
   }
 }

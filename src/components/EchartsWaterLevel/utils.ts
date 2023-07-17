@@ -1,8 +1,8 @@
 /*
  * @Author: cpasion-office-win10 373704015@qq.com
  * @Date: 2023-07-12 15:48:27
- * @LastEditors: CPS holy.dandelion@139.com
- * @LastEditTime: 2023-07-13 23:07:42
+ * @LastEditors: cpasion-office-win10 373704015@qq.com
+ * @LastEditTime: 2023-07-17 14:58:11
  * @FilePath: \duanmianzhexiantu\src\components\EchartsWaterLevel\utils.ts
  * @Description: 一些数据处理的过程和工具函数
  */
@@ -166,6 +166,7 @@ export const createEChartsOption = (data: SheetsDataT, settings: SettingType): E
           color: "black",
           position: pointPosition(index, waterFlowPointData.length),
         },
+        z:6
       },
     ],
     color: "blue",
@@ -269,7 +270,7 @@ export const createEChartsOption = (data: SheetsDataT, settings: SettingType): E
 
     yAxis: {
       name: "高程(m)",
-      nameLocation: "center",
+      nameLocation: "middle",
       show: true,
       type: "value",
       min: y_min,
@@ -286,6 +287,8 @@ export const createEChartsOption = (data: SheetsDataT, settings: SettingType): E
       splitLine: { show: settings.grid },
       z: 3,
     },
+
+
     series: [
       ...waterFlowPoint, // 倒三角
       ...waterFlowLineList, // 水位线

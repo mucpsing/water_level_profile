@@ -7,7 +7,7 @@
     <div class="border-2 rounded-lg border-cyan-200 w-[852px] h-[480px] bg-slate-400 flex flex-row">
       <div id="chart-container" class="relative rounded-md w-full h-full bg-white">
         <div class="absolute top-0 left-1/2 translate-x-[-50%]">
-          <var-image @click="showExample = true" class="cursor-pointer" height="420" :src="examplePngUrl" />
+          <var-image @click="showExample = true" class="cursor-pointer" height="420" :src="ExampleImgUrl" />
           <var-button class="w-full top-3" type="warning" @click="showExample = true">
             <var-icon name="help-circle-outline" />
             &nbsp;&nbsp;Excel数据格式要求&nbsp;&nbsp;
@@ -61,16 +61,52 @@
 </template>
 
 <script lang="ts" setup>
-import * as echarts from "echarts";
-import * as XLSX from "xlsx";
+import * as echarts from "echarts/core";
+import {
+  TitleComponent,
+  TooltipComponent,
+  GridComponent,
+  DatasetComponent,
+  TransformComponent,
+  LegendComponent,
+  GraphicComponent,
+} from "echarts/components";
+import { ScatterChart, BarChart, LineChart } from "echarts/charts";
+// 标签自动布局、全局过渡动画等特性
+import { LabelLayout, UniversalTransition } from "echarts/features";
+
+// 引入 Canvas 渲染器，注意引入 CanvasRenderer 或者 SVGRenderer 是必须的一步
+import { CanvasRenderer } from "echarts/renderers";
+
+import { read as xlsxRead } from "xlsx";
 import { Snackbar } from "@varlet/ui";
 
-import type { ExcelDataListT } from "./utils";
 import { createEChartsOption, readdExcelFileFromWorkBook } from "./utils";
-import { createSettings, showExample, examplePngUrl } from "./state";
+import { createSettings, showExample } from "./state";
 import SettingsComponent from "./settings.vue";
 
-const images = ref(["/dataExample.png"]);
+import ExampleImgUrl from "../../assets/dataExample.png";
+
+import type { ExcelDataListT } from "./utils";
+import type { EChartsOption } from "echarts";
+
+echarts.use([
+  LineChart,
+  TitleComponent,
+  TooltipComponent,
+  LegendComponent,
+  GridComponent,
+  DatasetComponent,
+  TransformComponent,
+  BarChart,
+  ScatterChart,
+  LabelLayout,
+  UniversalTransition,
+  CanvasRenderer,
+  GraphicComponent,
+]);
+
+const images = ref([ExampleImgUrl]);
 
 const Settings = createSettings();
 const SHEET_NAMES = ref<string[]>([]);
@@ -80,7 +116,7 @@ const CURRT_EXCEL_FILE_NAME = ref("选择Excel文件");
 const Popupshow = ref(false);
 
 let EXCEL_DATA_LIST: ExcelDataListT = [];
-let CURRT_OPTIONS: echarts.EChartsOption;
+let CURRT_OPTIONS: EChartsOption;
 let chartElement: HTMLElement | null = null;
 
 const chartElementID = "chart-container";
@@ -146,7 +182,7 @@ const handleFileRead = (event: ProgressEvent<FileReader>) => {
 
     if (chartElement) {
       const dataBuffer = new Uint8Array(event.target.result as ArrayBuffer);
-      const workbook = XLSX.read(dataBuffer, { type: "array" });
+      const workbook = xlsxRead(dataBuffer, { type: "array" });
 
       SHEET_NAMES.value = workbook.SheetNames;
       CURRT_SHEET_NAME.value = SHEET_NAMES.value[CURRT_SHEET_ID.value];
