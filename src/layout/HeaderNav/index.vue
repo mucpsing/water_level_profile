@@ -15,5 +15,4 @@ div(class='bg-red-50 mx-2') {{ test }}
 <script lang="ts" setup>
 onMounted(() => {});
 
-const test = ref("test");
 </script>

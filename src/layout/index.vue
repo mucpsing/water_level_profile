@@ -9,7 +9,14 @@
 -->
 
 <template>
-  <EchartsWaterLevel />
+  <div>
+    <header>
+      <var-app-bar title="开启圆角" title-position="center" round />
+    </header>
+    <main>
+      <EchartsWaterLevel />
+    </main>
+  </div>
 </template>
 
 <script setup lang="ts">
